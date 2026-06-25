@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from '../utils/axios';
 import { AuthContext } from '../contexts/AuthContext';
+import './CarDetail.css';
 
 const CarDetail = () => {
   const { id } = useParams();
@@ -52,12 +53,10 @@ const CarDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 text-gray-900 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-300 rounded w-1/3 mb-6"></div>
-            <div className="h-64 bg-gray-300 rounded mb-6"></div>
-          </div>
+      <div className="car-detail-container">
+        <div style={{ textAlign: 'center', padding: '40px 0' }}>
+          <div style={{ width: '40px', height: '40px', border: '3px solid var(--border-color)', borderTopColor: 'var(--primary-color)', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto' }}></div>
+          <p style={{ marginTop: '16px', color: 'var(--text-muted)' }}>Loading car details...</p>
         </div>
       </div>
     );
@@ -65,18 +64,17 @@ const CarDetail = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 text-gray-900 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            <h3 className="font-bold">Error</h3>
-            <p>{error}</p>
-            <button 
-              onClick={() => window.location.reload()} 
-              className="mt-3 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded"
-            >
-              Retry
-            </button>
-          </div>
+      <div className="car-detail-container">
+        <div className="checkout-error" style={{ margin: '20px 0', textAlign: 'center' }}>
+          <h3>Error</h3>
+          <p>{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="btn-primary"
+            style={{ marginTop: '16px', display: 'block', margin: '16px auto 0' }}
+          >
+            Retry
+          </button>
         </div>
       </div>
     );
@@ -84,114 +82,118 @@ const CarDetail = () => {
 
   if (!car) {
     return (
-      <div className="min-h-screen bg-gray-50 text-gray-900 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold">Car not found</h2>
-            <button 
-              onClick={() => navigate('/')} 
-              className="mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"
-            >
-              Go Back Home
-            </button>
-          </div>
+      <div className="car-detail-container">
+        <div style={{ textAlign: 'center', padding: '40px 0' }}>
+          <h2>Car not found</h2>
+          <button 
+            onClick={() => navigate('/')} 
+            className="btn-primary"
+            style={{ marginTop: '16px', display: 'block', margin: '16px auto 0' }}
+          >
+            Go Back Home
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 py-8">
-      {/* Car Details Section */}
-      <section className="py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <button
-            onClick={() => navigate(-1)}
-            className="mb-6 flex items-center text-blue-600 hover:text-blue-800"
-          >
-            <span className="mr-2">←</span> Back to Cars
-          </button>
+    <div className="car-detail-container">
+      {/* Left section: Image */}
+      <div className="car-images-section">
+        <button
+          onClick={() => navigate(-1)}
+          className="btn-secondary"
+          style={{ marginBottom: '20px', marginLeft: '0', display: 'inline-flex', padding: '8px 16px' }}
+        >
+          ← Back
+        </button>
+        <div style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden', height: '350px', border: '1px solid var(--border-color)' }}>
+          <img 
+            src={
+              car.images && car.images.length > 0
+                ? (car.images[0].startsWith('http') ? car.images[0] : `${apiBaseUrl}${car.images[0]}`)
+                : '/placeholder-car.jpg'
+            } 
+            alt={car.name} 
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+        </div>
+      </div>
 
-          <div className="lg:grid lg:grid-cols-2 lg:gap-x-8 lg:items-start">
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-              {/* Car Image */}
-              <div className="relative">
-                  <img 
-                  src={
-                    car.images && car.images.length > 0
-                      ? (car.images[0].startsWith('http') ? car.images[0] : `${apiBaseUrl}${car.images[0]}`)
-                      : '/placeholder-car.jpg'
-                  } 
-                  alt={car.name} 
-                  className="w-full h-96 object-cover"
-                />
-              </div>
+      {/* Right section: Info */}
+      <div className="car-info-section">
+        <div className="car-basic-info">
+          <h1>{car.name}</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '15px', fontWeight: '500' }}>{car.brand} • {car.model}</p>
+        </div>
 
-              <div className="p-6">
-                <div className="flex flex-col md:flex-row justify-between">
-                  <div>
-                    <h1 className="text-3xl font-bold text-gray-900">{car.name}</h1>
-                    <p className="text-gray-600 mt-2">{car.brand} • {car.model}</p>
-                  </div>
-                </div>
-
-                {/* Car Details */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
-                  <div className="text-center p-4 bg-gray-50 rounded-lg">
-                    <p className="text-sm text-gray-600">Brand</p>
-                    <p className="font-semibold">{car.brand}</p>
-                  </div>
-                  <div className="text-center p-4 bg-gray-50 rounded-lg">
-                    <p className="text-sm text-gray-600">Model</p>
-                    <p className="font-semibold">{car.model}</p>
-                  </div>
-                  <div className="text-center p-4 bg-gray-50 rounded-lg">
-                    <p className="text-sm text-gray-600">Year</p>
-                    <p className="font-semibold">{car.year}</p>
-                  </div>
-                  <div className="text-center p-4 bg-gray-50 rounded-lg">
-                    <p className="text-sm text-gray-600">Status</p>
-                    <p className={`font-semibold ${car.available ? 'text-green-600' : 'text-red-600'}`}>
-                      {car.available ? 'Available' : 'Not Available'}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Rental Days Input */}
-                <div className="mt-8">
-                  <label htmlFor="rental-days" className="block text-sm font-medium text-gray-700 mb-2">
-                    Rental Days
-                  </label>
-                  <input
-                    type="number"
-                    id="rental-days"
-                    min="1"
-                    max="365"
-                    value={rentalDays}
-                    onChange={(e) => setRentalDays(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-
-                {/* Add to Cart Button */}
-                <div className="mt-6">
-                  <button
-                    onClick={handleAddToCart}
-                    disabled={addedToCart}
-                    className={`w-full py-3 px-6 rounded-lg font-semibold text-white ${
-                      addedToCart 
-                        ? 'bg-green-600' 
-                        : 'bg-blue-600 hover:bg-blue-700'
-                    }`}
-                  >
-                    {addedToCart ? 'Added to Cart!' : 'Add to Cart'}
-                  </button>
-                </div>
-              </div>
-            </div>
+        {/* Specifications Grid */}
+        <div className="car-specs">
+          <div className="spec">
+            <span className="spec-label">Brand</span>
+            <span className="spec-value">{car.brand}</span>
+          </div>
+          <div className="spec">
+            <span className="spec-label">Model</span>
+            <span className="spec-value">{car.model}</span>
+          </div>
+          <div className="spec">
+            <span className="spec-label">Year</span>
+            <span className="spec-value">{car.year}</span>
+          </div>
+          <div className="spec">
+            <span className="spec-label">Status</span>
+            <span className="spec-value" style={{ color: car.available ? 'var(--accent-color)' : '#ef4444' }}>
+              {car.available ? 'Available' : 'Booked / Maintenance'}
+            </span>
           </div>
         </div>
-      </section>
+
+        {/* Price display */}
+        <div className="price-section">
+          <div className="daily-price">
+            <span className="price">{car.pricePerDay} coins</span>
+            <span className="per-day">/ day</span>
+          </div>
+          <div className="total-price">
+            <span>Estimated Total ({rentalDays} Day{rentalDays > 1 ? 's' : ''}):</span>
+            <span style={{ color: 'var(--primary-color)' }}>{car.pricePerDay * rentalDays} coins</span>
+          </div>
+        </div>
+
+        {/* Action Controls */}
+        <div className="rental-controls">
+          <div className="duration-control">
+            <label htmlFor="rental-days">Select Rental Duration (Days)</label>
+            <input
+              type="number"
+              id="rental-days"
+              min="1"
+              max="365"
+              value={rentalDays}
+              onChange={(e) => setRentalDays(Math.max(1, parseInt(e.target.value) || 1))}
+              className="form-control"
+            />
+          </div>
+
+          <button
+            onClick={handleAddToCart}
+            disabled={addedToCart || !car.available}
+            className={`add-to-cart-btn ${addedToCart ? 'added' : ''}`}
+          >
+            {addedToCart ? 'Added to Cart!' : !car.available ? 'Not Available' : 'Add to Cart'}
+          </button>
+        </div>
+
+        {/* Provider info */}
+        {car.provider && (
+          <div className="provider-info" style={{ fontSize: '13px', color: 'var(--text-muted)', display: 'flex', gap: '6px' }}>
+            <span>Listed by provider: </span>
+            <strong style={{ color: 'var(--text-main)' }}>{car.provider.name}</strong>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

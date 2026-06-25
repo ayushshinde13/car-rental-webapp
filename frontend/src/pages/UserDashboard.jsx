@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from '../utils/axios';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
+import './UserDashboard.css';
 
 const UserDashboard = () => {
   const { user } = useContext(AuthContext);
@@ -46,12 +47,10 @@ const UserDashboard = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 text-gray-900 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h1 className="text-3xl font-bold mb-6">Please Log In</h1>
-            <p className="text-gray-600">You need to log in to access your dashboard.</p>
-          </div>
+      <div className="dashboard-container">
+        <div className="dashboard-main-section">
+          <h1 className="dashboard-title mb-6">Please Log In</h1>
+          <p className="text-gray-600">You need to log in to access your dashboard.</p>
         </div>
       </div>
     );
@@ -59,236 +58,232 @@ const UserDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 text-gray-900 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-300 rounded w-1/3 mb-6"></div>
-            <div className="h-4 bg-gray-300 rounded w-1/4 mb-4"></div>
-            <div className="h-4 bg-gray-300 rounded w-1/2 mb-4"></div>
-          </div>
+      <div className="dashboard-container">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-300 rounded w-1/3 mb-6"></div>
+          <div className="h-64 bg-gray-300 rounded mb-6"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
-            <div>
-              <h1 className="text-3xl font-bold mb-2">Welcome, {user.name}!</h1>
-              <p className="text-gray-600">Your personal dashboard</p>
-            </div>
-            <div className="mt-4 md:mt-0">
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                {user.role === 'renter' ? 'Renter' : user.role === 'provider' ? 'Car Provider' : 'Admin'}
-              </span>
-            </div>
-          </div>
+    <div className="dashboard-container">
+      <div className="dashboard-header">
+        <div>
+          <h1 className="dashboard-title">Welcome, {user.name}!</h1>
+          <p className="dashboard-welcome">Your personal renter dashboard</p>
         </div>
-        
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {user.role === 'renter' && (
-            <>
-              <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-                <h3 className="text-lg font-semibold mb-2">My Bookings</h3>
-                <p className="text-gray-600">View your rental history</p>
-              </div>
-              <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-                <h3 className="text-lg font-semibold mb-2">My Cart</h3>
-                <p className="text-gray-600">Manage items in your cart</p>
-              </div>
-            </>
-          )}
-          {user.role === 'provider' && (
-            <>
-              <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-                <h3 className="text-lg font-semibold mb-2">My Cars</h3>
-                <p className="text-gray-600">Manage your listed cars</p>
-              </div>
-              <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-                <h3 className="text-lg font-semibold mb-2">Add Car</h3>
-                <p className="text-gray-600">Add a new car to rent</p>
-              </div>
-            </>
-          )}
-          <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-            <h3 className="text-lg font-semibold mb-2">Wallet</h3>
-            <p className="text-gray-600">Check your balance</p>
-          </div>
+        <div>
+          <span className="renter-dashboard-booking-status renter-dashboard-booking-status-completed">
+            {user.role === 'renter' ? 'Renter' : user.role === 'provider' ? 'Car Provider' : 'Admin'}
+          </span>
         </div>
-        
-        {/* Wallet Summary */}
-        {wallet && (
-          <div className="rounded-xl shadow-lg p-6 mb-8 bg-gradient-to-r from-blue-500 to-purple-600 text-white">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
-              <div>
-                <h2 className="text-lg font-medium opacity-80">Wallet Balance</h2>
-                <p className="text-4xl font-bold mt-2">{wallet.balance} Coins</p>
-                <p className="opacity-80 mt-1">Level: {wallet.level}</p>
-              </div>
-              <Link 
-                to="/wallet" 
-                className="mt-4 md:mt-0 bg-white text-blue-600 hover:bg-gray-100 font-bold py-3 px-6 rounded-lg transition duration-300"
-              >
-                View Wallet
-              </Link>
-            </div>
-          </div>
-        )}
-
-        {/* Tab Navigation */}
-        <div className="flex border-b mb-6">
-          <button
-            className={`py-2 px-4 font-medium ${activeTab === 'profile' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500'}`}
-            onClick={() => setActiveTab('profile')}
-          >
-            Profile
-          </button>
-          <button
-            className={`py-2 px-4 font-medium ${activeTab === 'bookings' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500'}`}
-            onClick={() => setActiveTab('bookings')}
-          >
-            My Bookings
-          </button>
-          <button
-            className={`py-2 px-4 font-medium ${activeTab === 'payments' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500'}`}
-            onClick={() => setActiveTab('payments')}
-          >
-            Payment History
-          </button>
-        </div>
-
-        {/* Profile Tab */}
-        {activeTab === 'profile' && userData && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h2 className="text-xl font-semibold mb-4">Profile Information</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                <p className="text-gray-900">{userData.name}</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <p className="text-gray-900">{userData.email}</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                <p className="text-gray-900 capitalize">{userData.role}</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Bookings Tab */}
-        {activeTab === 'bookings' && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h2 className="text-xl font-semibold mb-4">My Bookings</h2>
-            
-            {bookings.length === 0 ? (
-              <p className="text-gray-500">You haven't made any bookings yet.</p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Car</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dates</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Price</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Coins Paid</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {bookings.map((booking) => (
-                      <tr key={booking._id}>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">{booking.car?.name || "Deleted Car"}</div>
-                          <div className="text-sm text-gray-500">{booking.car ? `${booking.car.brand} • ${booking.car.year}` : "N/A"}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
-                            {new Date(booking.startDate).toLocaleDateString()} - {new Date(booking.endDate).toLocaleDateString()}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {booking.totalPrice} coins
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {booking.coinsPaid} coins
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                            ${booking.bookingStatus === 'active' ? 'bg-green-100 text-green-800' : 
-                              booking.bookingStatus === 'cancelled' ? 'bg-red-100 text-red-800' : 
-                              'bg-yellow-100 text-yellow-800'}`}
-                          >
-                            {booking.bookingStatus}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Payments Tab */}
-        {activeTab === 'payments' && (
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-4">Payment History</h2>
-            
-            {payments.length === 0 ? (
-              <p className="text-gray-500">No payment history found.</p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booking</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {payments.map((payment) => (
-                      <tr key={payment._id}>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
-                            {payment.booking && payment.booking.car ? 
-                              `${payment.booking.car.name} (${payment.booking.car.brand})` : 
-                              'N/A'}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {payment.amount} coins
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {new Date(payment.createdAt).toLocaleDateString()}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                            ${payment.status === 'success' ? 'bg-green-100 text-green-800' : 
-                              payment.status === 'failed' ? 'bg-red-100 text-red-800' : 
-                              'bg-yellow-100 text-yellow-800'}`}
-                          >
-                            {payment.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
       </div>
+      
+      {/* Quick Stats Grid */}
+      <div className="dashboard-stats">
+        {user.role === 'renter' && (
+          <>
+            <div className="dashboard-stat-card" onClick={() => setActiveTab('bookings')} style={{ cursor: 'pointer' }}>
+              <h3 className="dashboard-stat-title">My Bookings</h3>
+              <p className="dashboard-stat-value">{bookings.length}</p>
+              <div className="dashboard-stat-change dashboard-stat-increase">View active & past rentals</div>
+            </div>
+            <Link to="/cart" className="dashboard-stat-card" style={{ textDecoration: 'none' }}>
+              <h3 className="dashboard-stat-title">My Cart</h3>
+              <p className="dashboard-stat-value">View Cart</p>
+              <div className="dashboard-stat-change dashboard-stat-increase">Check pending items</div>
+            </Link>
+          </>
+        )}
+        <div className="dashboard-stat-card" onClick={() => setActiveTab('profile')} style={{ cursor: 'pointer' }}>
+          <h3 className="dashboard-stat-title">Account Level</h3>
+          <p className="dashboard-stat-value">{wallet?.level || 'Beginner'}</p>
+          <div className="dashboard-stat-change dashboard-stat-increase">Earn cashback points</div>
+        </div>
+      </div>
+      
+      {/* Wallet Balance section */}
+      {wallet && (
+        <div className="wallet-balance-section">
+          <div>
+            <h2 className="wallet-balance-title">Wallet Balance</h2>
+            <p className="wallet-balance-amount">{wallet.balance}<span className="wallet-balance-currency">Coins</span></p>
+            <p className="opacity-90 mt-1">Status: Level {wallet.level}</p>
+          </div>
+          <Link to="/wallet" className="wallet-action-button wallet-action-button-add">
+            View & Add Funds
+          </Link>
+        </div>
+      )}
+
+      {/* Tab Navigation */}
+      <div className="flex border-b mb-6" style={{ display: 'flex', gap: '8px', borderBottom: '1px solid var(--border-color)', marginBottom: '24px' }}>
+        <button
+          className="nav-link"
+          style={{
+            border: 'none',
+            background: activeTab === 'profile' ? 'var(--primary-color)' : 'transparent',
+            color: activeTab === 'profile' ? 'white' : 'var(--text-muted)',
+            cursor: 'pointer',
+            padding: '8px 16px',
+            borderRadius: 'var(--radius-sm)',
+            fontWeight: '600'
+          }}
+          onClick={() => setActiveTab('profile')}
+        >
+          Profile
+        </button>
+        <button
+          className="nav-link"
+          style={{
+            border: 'none',
+            background: activeTab === 'bookings' ? 'var(--primary-color)' : 'transparent',
+            color: activeTab === 'bookings' ? 'white' : 'var(--text-muted)',
+            cursor: 'pointer',
+            padding: '8px 16px',
+            borderRadius: 'var(--radius-sm)',
+            fontWeight: '600'
+          }}
+          onClick={() => setActiveTab('bookings')}
+        >
+          My Bookings
+        </button>
+        <button
+          className="nav-link"
+          style={{
+            border: 'none',
+            background: activeTab === 'payments' ? 'var(--primary-color)' : 'transparent',
+            color: activeTab === 'payments' ? 'white' : 'var(--text-muted)',
+            cursor: 'pointer',
+            padding: '8px 16px',
+            borderRadius: 'var(--radius-sm)',
+            fontWeight: '600'
+          }}
+          onClick={() => setActiveTab('payments')}
+        >
+          Payment History
+        </button>
+      </div>
+
+      {/* Profile Tab */}
+      {activeTab === 'profile' && userData && (
+        <div className="dashboard-main-section">
+          <h2 className="dashboard-section-title">Profile Information</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div>
+              <label style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-muted)' }}>Full Name</label>
+              <p style={{ fontSize: '16px', fontWeight: '600', color: 'var(--text-main)', marginTop: '4px' }}>{userData.name}</p>
+            </div>
+            <div>
+              <label style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-muted)' }}>Email Address</label>
+              <p style={{ fontSize: '16px', fontWeight: '600', color: 'var(--text-main)', marginTop: '4px' }}>{userData.email}</p>
+            </div>
+            <div>
+              <label style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-muted)' }}>Account Role</label>
+              <p style={{ fontSize: '16px', fontWeight: '600', color: 'var(--text-main)', marginTop: '4px', textTransform: 'capitalize' }}>{userData.role}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bookings Tab */}
+      {activeTab === 'bookings' && (
+        <div className="dashboard-main-section">
+          <h2 className="dashboard-section-title">My Bookings</h2>
+          
+          {bookings.length === 0 ? (
+            <p className="dashboard-empty-state">You haven't made any bookings yet.</p>
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Car</th>
+                    <th>Dates</th>
+                    <th>Total Price</th>
+                    <th>Coins Paid</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {bookings.map((booking) => (
+                    <tr key={booking._id}>
+                      <td style={{ fontWeight: '700' }}>
+                        <div>{booking.car?.name || "Deleted Car"}</div>
+                        <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '500', marginTop: '2px' }}>
+                          {booking.car ? `${booking.car.brand} • ${booking.car.year}` : "N/A"}
+                        </div>
+                      </td>
+                      <td>
+                        {new Date(booking.startDate).toLocaleDateString()} - {new Date(booking.endDate).toLocaleDateString()}
+                      </td>
+                      <td style={{ fontWeight: '700', color: 'var(--primary-color)' }}>
+                        {booking.totalPrice} coins
+                      </td>
+                      <td style={{ fontWeight: '700' }}>
+                        {booking.coinsPaid} coins
+                      </td>
+                      <td>
+                        <span className={`renter-dashboard-booking-status renter-dashboard-booking-status-${booking.bookingStatus}`}>
+                          {booking.bookingStatus}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Payments Tab */}
+      {activeTab === 'payments' && (
+        <div className="dashboard-main-section">
+          <h2 className="dashboard-section-title">Payment History</h2>
+          
+          {payments.length === 0 ? (
+            <p className="dashboard-empty-state">No payment history found.</p>
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Booking</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {payments.map((payment) => (
+                    <tr key={payment._id}>
+                      <td style={{ fontWeight: '700' }}>
+                        {payment.booking && payment.booking.car ? 
+                          `${payment.booking.car.name} (${payment.booking.car.brand})` : 
+                          'N/A'}
+                      </td>
+                      <td style={{ fontWeight: '700', color: 'var(--primary-color)' }}>
+                        {payment.amount} coins
+                      </td>
+                      <td>
+                        {new Date(payment.createdAt).toLocaleDateString()}
+                      </td>
+                      <td>
+                        <span className={`renter-dashboard-booking-status ${payment.status === 'success' ? 'renter-dashboard-booking-status-completed' : 'renter-dashboard-booking-status-cancelled'}`}>
+                          {payment.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
