@@ -181,7 +181,14 @@ router.post("/webhook", express.raw({ type: "application/json" }), async (req, r
 router.get("/my-payments", auth, async (req, res) => {
   try {
     const payments = await Payment.find({ user: req.user.id })
-      .populate('booking', 'startDate endDate totalPrice bookingStatus')
+      .populate({
+        path: 'booking',
+        select: 'startDate endDate totalPrice bookingStatus car',
+        populate: {
+          path: 'car',
+          select: 'name brand'
+        }
+      })
       .sort({ createdAt: -1 });
 
     res.json(payments);
@@ -195,7 +202,14 @@ router.get("/my-payments", auth, async (req, res) => {
 router.get("/:id", auth, async (req, res) => {
   try {
     const payment = await Payment.findById(req.params.id)
-      .populate('booking', 'startDate endDate totalPrice bookingStatus')
+      .populate({
+        path: 'booking',
+        select: 'startDate endDate totalPrice bookingStatus car',
+        populate: {
+          path: 'car',
+          select: 'name brand'
+        }
+      })
       .populate('user', 'name email coins'); // Added coins field
 
     if (!payment) {

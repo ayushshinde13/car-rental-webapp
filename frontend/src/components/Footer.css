@@ -1,0 +1,28 @@
+.footer {
+  background: linear-gradient(135deg, #1f2937, #111827); /* dark gradient */
+  color: #f3f4f6; /* light text color */
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.footer-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.footer p {
+  margin: 0.25rem 0;
+  font-size: 0.95rem;
+}
+
+.footer-sub {
+  font-size: 0.85rem;
+  color: #9ca3af; /* lighter gray for secondary text */
+  margin-top: 0.5rem;
+}
+
+.footer span {
+  font-weight: 600; /* bold for app name */
+  color: #ffffff;
+}

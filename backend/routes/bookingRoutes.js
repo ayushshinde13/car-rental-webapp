@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const mongoose = require("mongoose");
 const auth = require("../middleware/authmiddleware"); // ✅ Using the correct auth middleware
 const { body, validationResult } = require("express-validator");
 
@@ -53,13 +54,13 @@ router.post("/", auth, validateBookingInput, async (req, res) => {
     const { carId, startDate, endDate, couponCode } = req.body;
 
     // Check if car exists and is available
-    const car = await Car.findById(carId).populate('owner');
+    const car = await Car.findById(carId).populate('provider');
     if (!car) {
       return res.status(404).json({ message: "Car not found" });
     }
 
     // Prevent self-booking (anti-fraud measure)
-    if (car.owner._id.toString() === req.user.id) {
+    if (car.provider._id.toString() === req.user.id) {
       return res.status(400).json({ message: "Cannot book your own car" });
     }
 
@@ -83,8 +84,8 @@ router.post("/", auth, validateBookingInput, async (req, res) => {
     const start = new Date(startDate);
     const end = new Date(endDate);
     const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)); // Difference in days
-    const totalPrice = days * 50; // Base price per day - you can adjust this
-    let coinsRequired = car.coinsRequired * days; // Coins required based on car's setting
+    const totalPrice = days * car.pricePerDay;
+    let coinsRequired = car.pricePerDay * days;
 
     // Check if a coupon code was provided and apply discount
     let couponApplied = null;
@@ -125,11 +126,7 @@ router.post("/", auth, validateBookingInput, async (req, res) => {
       });
     }
 
-    // Use MongoDB session for atomic transaction
-    const session = await require("../server").mongoose.startSession();
-    session.startTransaction();
-
-    try {
+    const executeOperations = async (sessionOption) => {
       // Deduct coins from renter's wallet
       userWallet.balance -= coinsRequired;
       userWallet.transactions.push({
@@ -138,19 +135,18 @@ router.post("/", auth, validateBookingInput, async (req, res) => {
         description: `Rented car: ${car.name} for ${days} days` + 
           (discountAmount > 0 ? ` with ${discountAmount} coin discount from coupon ${couponApplied.code}` : '')
       });
-      await userWallet.save({ session });
+      await userWallet.save(sessionOption);
 
       // Credit coins to owner's wallet
-      let ownerWallet = await Wallet.findOne({ user: car.owner._id });
+      let ownerWallet = await Wallet.findOne({ user: car.provider._id });
       if (!ownerWallet) {
-        // This shouldn't happen if the owner was created with default coins
         ownerWallet = new Wallet({
-          user: car.owner._id,
+          user: car.provider._id,
           balance: coinsRequired,
           totalCoinsEarned: coinsRequired,
           level: "Beginner",
           badges: [],
-          coupons: [] // No coupons initially
+          coupons: []
         });
       } else {
         ownerWallet.balance += coinsRequired;
@@ -163,8 +159,7 @@ router.post("/", auth, validateBookingInput, async (req, res) => {
         description: `Received payment for car rental: ${car.name}`
       });
       
-      // Update owner's level based on total coins earned
-      const levelRules = [
+      const currentLevelRules = [
         { level: "Beginner", minCoins: 0 },
         { level: "Explorer", minCoins: 100 },
         { level: "Pro Renter", minCoins: 300 },
@@ -173,7 +168,7 @@ router.post("/", auth, validateBookingInput, async (req, res) => {
       ];
       
       const getLevelByCoins = (totalCoinsEarned) => {
-        const sortedLevels = [...levelRules].sort((a, b) => b.minCoins - a.minCoins);
+        const sortedLevels = [...currentLevelRules].sort((a, b) => b.minCoins - a.minCoins);
         for (const levelRule of sortedLevels) {
           if (totalCoinsEarned >= levelRule.minCoins) {
             return levelRule.level;
@@ -183,7 +178,7 @@ router.post("/", auth, validateBookingInput, async (req, res) => {
       };
       
       ownerWallet.level = getLevelByCoins(ownerWallet.totalCoinsEarned);
-      await ownerWallet.save({ session });
+      await ownerWallet.save(sessionOption);
 
       // Create new booking
       const booking = new Booking({
@@ -193,28 +188,76 @@ router.post("/", auth, validateBookingInput, async (req, res) => {
         endDate: new Date(endDate),
         totalPrice,
         coinsPaid: coinsRequired,
-        cashbackCoins: 0 // Will be added upon completion
+        cashbackCoins: 0
       });
 
-      const savedBooking = await booking.save({ session });
+      const savedBooking = await booking.save(sessionOption);
+      return savedBooking;
+    };
 
+    let savedBooking;
+    let session = null;
+
+    try {
+      session = await mongoose.startSession();
+      session.startTransaction();
+      savedBooking = await executeOperations({ session });
       await session.commitTransaction();
-      
-      // Populate the booking with user and car details
-      const populatedBooking = await Booking.findById(savedBooking._id)
-        .populate('user', 'name email')
-        .populate('car', 'name brand year coinsRequired images owner');
-
-      res.status(201).json({ 
-        message: "Booking created successfully", 
-        booking: populatedBooking 
-      });
     } catch (transactionError) {
-      await session.abortTransaction();
-      throw transactionError;
+      if (session) {
+        try {
+          await session.abortTransaction();
+        } catch (abortError) {
+          // Ignore
+        }
+      }
+      
+      const isReplicaSetError = 
+        transactionError.code === 20 || 
+        (transactionError.message && (
+          transactionError.message.includes("replica set") || 
+          transactionError.message.includes("Transaction numbers")
+        ));
+        
+      if (isReplicaSetError) {
+        console.warn("MongoDB standalone detected. Falling back to non-transactional operations.");
+        // Reload userWallet since the memory instance might be in an inconsistent state
+        userWallet = await Wallet.findOne({ user: req.user.id });
+        if (!userWallet || userWallet.balance < coinsRequired) {
+          return res.status(400).json({ 
+            message: `Insufficient coins. You need ${coinsRequired} coins but have ${userWallet ? userWallet.balance : 0} coins.` 
+          });
+        }
+        savedBooking = await executeOperations({});
+      } else {
+        throw transactionError;
+      }
     } finally {
-      await session.endSession();
+      if (session) {
+        try {
+          await session.endSession();
+        } catch (endError) {
+          // Ignore
+        }
+      }
     }
+
+    // Populate the booking with user and car details
+    const populatedBooking = await Booking.findById(savedBooking._id)
+      .populate('user', 'name email')
+      .populate({
+        path: 'car',
+        select: 'name brand year pricePerDay images provider',
+        populate: {
+          path: 'provider',
+          select: 'name email'
+        }
+      });
+
+    res.status(201).json({ 
+      message: "Booking created successfully", 
+      booking: populatedBooking 
+    });
   } catch (error) {
     console.error("CREATE BOOKING ERROR:", error);
     res.status(500).json({ message: "Server error" });
@@ -225,7 +268,7 @@ router.post("/", auth, validateBookingInput, async (req, res) => {
 router.get("/mybookings", auth, async (req, res) => {
   try {
     const bookings = await Booking.find({ user: req.user.id })
-      .populate('car', 'name brand year coinsRequired images')
+      .populate('car', 'name brand year pricePerDay images')
       .populate('user', 'name email')
       .sort({ createdAt: -1 }); // Sort by newest first
 
@@ -246,8 +289,14 @@ router.get("/", auth, async (req, res) => {
 
     const bookings = await Booking.find()
       .populate('user', 'name email')
-      .populate('car', 'name brand year coinsRequired images')
-      .populate('car.owner', 'name email')
+      .populate({
+        path: 'car',
+        select: 'name brand year pricePerDay images provider',
+        populate: {
+          path: 'provider',
+          select: 'name email'
+        }
+      })
       .sort({ createdAt: -1 });
 
     res.json(bookings);
@@ -262,18 +311,24 @@ router.get("/:id", auth, async (req, res) => {
   try {
     const booking = await Booking.findById(req.params.id)
       .populate('user', 'name email')
-      .populate('car', 'name brand year coinsRequired images')
-      .populate('car.owner', 'name email');
+      .populate({
+        path: 'car',
+        select: 'name brand year pricePerDay images provider',
+        populate: {
+          path: 'provider',
+          select: 'name email'
+        }
+      });
 
     if (!booking) {
       return res.status(404).json({ message: "Booking not found" });
     }
 
-    // Only allow the booking user, car owner, or admin to view the booking
+    // Only allow the booking user, car provider, or admin to view the booking
     const car = await Car.findById(booking.car);
     if (
       booking.user.toString() !== req.user.id &&
-      car.owner.toString() !== req.user.id &&
+      car.provider.toString() !== req.user.id &&
       req.user.role !== 'admin'
     ) {
       return res.status(403).json({ message: "Access denied" });
@@ -296,10 +351,10 @@ router.put("/:id", auth, async (req, res) => {
       return res.status(404).json({ message: "Booking not found" });
     }
 
-    // Only allow car owner or admin to update booking
+    // Only allow car provider or admin to update booking
     const car = await Car.findById(booking.car);
     if (
-      car.owner.toString() !== req.user.id &&
+      car.provider.toString() !== req.user.id &&
       req.user.role !== 'admin'
     ) {
       return res.status(403).json({ message: "Access denied" });
@@ -343,8 +398,8 @@ router.put("/complete/:id", auth, async (req, res) => {
       return res.status(404).json({ message: "Booking not found" });
     }
 
-    // Only car owner or admin can complete the booking
-    if (booking.car.owner.toString() !== req.user.id && req.user.role !== 'admin') {
+    // Only car provider or admin can complete the booking
+    if (booking.car.provider.toString() !== req.user.id && req.user.role !== 'admin') {
       return res.status(403).json({ message: "Access denied" });
     }
 

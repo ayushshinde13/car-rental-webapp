@@ -36,7 +36,7 @@ router.post("/", auth, async (req, res) => {
     // Create feedback
     const feedback = new Feedback({
       renter: req.user.id,
-      owner: booking.car.owner,
+      owner: booking.car.provider,
       car: booking.car._id,
       booking: bookingId,
       rating,

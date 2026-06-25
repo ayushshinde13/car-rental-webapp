@@ -34,25 +34,7 @@ router.get("/", async (req, res) => {
       .populate("provider", "name avatar")
       .sort({ createdAt: -1 });
 
-    // Group cars by brand
-    const carsByBrand = {};
-    cars.forEach(car => {
-      const brand = car.brand;
-      if (!carsByBrand[brand]) {
-        carsByBrand[brand] = [];
-      }
-      carsByBrand[brand].push(car);
-    });
-
-    // Filter brands that have at least 4 cars
-    const filteredBrands = {};
-    Object.keys(carsByBrand).forEach(brand => {
-      if (carsByBrand[brand].length >= 4) {
-        filteredBrands[brand] = carsByBrand[brand];
-      }
-    });
-
-    res.json(filteredBrands);
+    res.json(cars);
   } catch (error) {
     console.error("GET CARS ERROR:", error);
     res.status(500).json({ message: "Server error" });
@@ -74,20 +56,32 @@ router.get("/:id", async (req, res) => {
 });
 
 // CREATE NEW CAR
-router.post("/", auth, carUpload.array("images", 8), async (req, res) => {
+const conditionalCarUpload = (req, res, next) => {
+  if (req.is("multipart/form-data")) {
+    return carUpload.array("images", 8)(req, res, next);
+  }
+  return next();
+};
+
+router.post("/", auth, conditionalCarUpload, async (req, res) => {
   try {
     // Check if user is a provider
     if (req.user.role !== "provider") {
       return res.status(403).json({ message: "Only providers can add cars" });
     }
 
-    // Validate minimum 4 images
-    if (!req.files || req.files.length < 4) {
-      return res.status(400).json({ message: "Minimum 4 images are required" });
+    // Extract image paths (from upload or from JSON body)
+    let imagePaths = [];
+    if (req.files && req.files.length > 0) {
+      imagePaths = req.files.map(file => `/uploads/cars/${file.filename}`);
+    } else if (req.body.images) {
+      imagePaths = Array.isArray(req.body.images) ? req.body.images : [req.body.images];
     }
 
-    // Extract image paths
-    const imagePaths = req.files.map(file => `/uploads/${file.filename}`);
+    // Validate minimum 1 image
+    if (!imagePaths || imagePaths.length < 1) {
+      return res.status(400).json({ message: "At least 1 image is required" });
+    }
 
     const { name, brand, model, year, pricePerDay, fuelType, transmission } = req.body;
 
@@ -138,12 +132,12 @@ router.put("/:id", auth, carUpload.array("images", 8), async (req, res) => {
 
     // Handle image updates if new images are provided
     if (req.files && req.files.length > 0) {
-      // Validate minimum 4 images if updating images
-      if (req.files.length < 4) {
-        return res.status(400).json({ message: "Minimum 4 images are required" });
+      // Validate minimum 1 image if updating images
+      if (req.files.length < 1) {
+        return res.status(400).json({ message: "At least 1 image is required" });
       }
       
-      updateData.images = req.files.map(file => `/uploads/${file.filename}`);
+      updateData.images = req.files.map(file => `/uploads/cars/${file.filename}`);
     }
 
     // Update car document

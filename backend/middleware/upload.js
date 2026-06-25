@@ -4,7 +4,7 @@ const path = require("path");
 // Storage configuration
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/"); // Make sure 'uploads/' folder exists
+    cb(null, "uploads/cars/"); // Make sure 'uploads/cars/' folder exists
   },
   filename: (req, file, cb) => {
     const uniqueName = `${Date.now()}-${file.originalname}`;

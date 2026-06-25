@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Car Rental App
 
 A full-stack car rental platform with multi-role support (Renter, Provider, Admin) built with React and Node.js.
@@ -141,7 +140,3 @@ The application will be available at `http://localhost:3000`.
 ## License
 
 This project is licensed under the ISC License.
-=======
-# car-rental-webapp
-Car Rental App •  Created a full-stack car rental platform using the MERN stack with JWT-based authentication, role-based access control (admin/user), RESTful APIs, and CRUD operations. •  Tech Stack: React.js, Node.js, Express.js, MongoDB, JWT 
->>>>>>> 3d75b794e7bc4407b269f9844475601718d28352

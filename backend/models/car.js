@@ -41,9 +41,9 @@ const carSchema = new mongoose.Schema({
       required: true,
       validate: {
         validator: function(images) {
-          return images.length >= 4;
+          return images.length >= 1;
         },
-        message: 'A car must have at least 4 images'
+        message: 'A car must have at least 1 image'
       }
     }
   ],
@@ -72,8 +72,8 @@ const carSchema = new mongoose.Schema({
 
 // Pre-save validation to ensure minimum 4 images
 carSchema.pre('validate', function(next) {
-  if (this.images && this.images.length < 4) {
-    this.invalidate('images', 'A car must have at least 4 images');
+  if (this.images && this.images.length < 1) {
+    this.invalidate('images', 'A car must have at least 1 image');
   }
   next();
 });

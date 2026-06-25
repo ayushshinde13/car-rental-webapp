@@ -1,0 +1,159 @@
+.car-card {
+  background: var(--card-background);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-color);
+}
+
+.car-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lg);
+}
+
+.image-container {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  background-color: #f1f5f9;
+}
+
+.image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-normal);
+}
+
+.car-card:hover .image-container img {
+  transform: scale(1.05);
+}
+
+.add-to-cart-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  z-index: 10;
+  box-shadow: 0 4px 10px rgba(99, 102, 241, 0.25);
+  transition: all var(--transition-fast);
+}
+
+.add-to-cart-btn:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+.add-to-cart-btn.added {
+  background: var(--accent-color);
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.25);
+}
+
+.add-to-cart-btn.added:hover {
+  background: var(--accent-hover);
+}
+
+.car-details {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.car-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  gap: 8px;
+}
+
+.car-title h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.price {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--primary-color);
+  white-space: nowrap;
+}
+
+.car-specs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.spec-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  background-color: #f1f5f9;
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.rating-section {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.stars {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.star {
+  color: #e2e8f0;
+  font-size: 14px;
+}
+
+.star.filled {
+  color: #f59e0b;
+}
+
+.rating-value {
+  margin-left: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.provider-section {
+  padding-top: 14px;
+  border-top: 1px solid var(--border-color);
+  margin-top: auto;
+  font-size: 13px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.provider-name {
+  color: var(--text-main);
+  font-weight: 600;
+}

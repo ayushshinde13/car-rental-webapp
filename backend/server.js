@@ -4,6 +4,8 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
+const auth = require("./middleware/authmiddleware");
+const upload = require("./middleware/upload");
 
 // Import models to ensure they're loaded
 require('./models/user');
@@ -25,7 +27,7 @@ const feedbackRoutes = require("./routes/feedbackRoutes"); // New feedback route
 const app = express();
 
 // Validate required environment variables
-const requiredEnvVars = ['MONGO_URI'];
+const requiredEnvVars = ['MONGO_URI', 'JWT_SECRET'];
 const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
 
 if (missingEnvVars.length > 0) {
@@ -52,6 +54,11 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir);
   console.log("✔ uploads folder created");
 }
+const carUploadsDir = path.join(uploadsDir, "cars");
+if (!fs.existsSync(carUploadsDir)) {
+  fs.mkdirSync(carUploadsDir, { recursive: true });
+  console.log("✔ uploads/cars folder created");
+}
 
 // -------------------------------------------
 // Middlewares
@@ -67,6 +74,14 @@ app.use(express.json());
 
 // Serve uploaded images
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// Image upload (provider only)
+app.post("/api/upload", auth, upload.single("image"), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: "No image uploaded" });
+  }
+  return res.json({ imageUrl: `/uploads/cars/${req.file.filename}` });
+});
 
 // -------------------------------------------
 // API Routes

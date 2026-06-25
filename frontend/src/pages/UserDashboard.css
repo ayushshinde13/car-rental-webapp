@@ -1,0 +1,280 @@
+/* Professional user dashboard styling */
+.dashboard-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.dashboard-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.dashboard-welcome {
+  color: #6b7280;
+  font-size: 1rem;
+  margin: 0.25rem 0 0 0;
+}
+
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+@media (min-width: 768px) {
+  .dashboard-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .dashboard-stats {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.dashboard-stat-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+  transition: transform 0.3s ease;
+}
+
+.dashboard-stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-stat-title {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin: 0 0 0.5rem 0;
+}
+
+.dashboard-stat-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.dashboard-stat-change {
+  display: flex;
+  align-items: center;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.dashboard-stat-increase {
+  color: #10b981;
+}
+
+.dashboard-stat-decrease {
+  color: #ef4444;
+}
+
+.dashboard-content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .dashboard-content {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+.dashboard-main-section {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+}
+
+.dashboard-section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 1.5rem 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.dashboard-bookings-list {
+  margin-top: 1rem;
+}
+
+.dashboard-booking-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.dashboard-booking-item:last-child {
+  border-bottom: none;
+}
+
+.dashboard-booking-info {
+  flex: 1;
+}
+
+.dashboard-booking-car {
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.25rem;
+}
+
+.dashboard-booking-dates {
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.dashboard-booking-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.dashboard-booking-status-pending {
+  background-color: #fef3c7;
+  color: #d97706;
+}
+
+.dashboard-booking-status-approved {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.dashboard-booking-status-completed {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.dashboard-booking-status-cancelled {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.dashboard-sidebar {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+}
+
+.dashboard-profile-card {
+  text-align: center;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 1.5rem;
+}
+
+.dashboard-profile-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 auto 1rem;
+}
+
+.dashboard-profile-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 0.25rem 0;
+}
+
+.dashboard-profile-email {
+  color: #6b7280;
+  margin: 0;
+}
+
+.dashboard-quick-actions {
+  margin-top: 1rem;
+}
+
+.dashboard-action-button {
+  display: block;
+  width: 100%;
+  padding: 0.875rem;
+  margin-bottom: 0.75rem;
+  border: none;
+  border-radius: 8px;
+  background-color: #3b82f6;
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.dashboard-action-button:hover {
+  background-color: #2563eb;
+  transform: translateY(-2px);
+}
+
+.dashboard-action-button:last-child {
+  margin-bottom: 0;
+}
+
+.dashboard-action-button-secondary {
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
+.dashboard-action-button-secondary:hover {
+  background-color: #d1d5db;
+}
+
+.dashboard-footer {
+  margin-top: 2rem;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.dashboard-empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: #6b7280;
+}
+
+.dashboard-empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: #d1d5db;
+}
+
+.dashboard-empty-message {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}

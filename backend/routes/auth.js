@@ -60,10 +60,12 @@ const getCurrentUser = async (req, res) => {
 
     // Only return safe fields
     res.json({
-      id: req.user._id,
-      name: req.user.name,
-      email: req.user.email,
-      role: req.user.role,
+      user: {
+        id: req.user._id,
+        name: req.user.name,
+        email: req.user.email,
+        role: req.user.role,
+      },
     });
   } catch (error) {
     console.error("GET CURRENT USER ERROR:", error);
