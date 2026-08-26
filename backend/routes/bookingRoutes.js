@@ -306,6 +306,33 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
+// GET RECENT BOOKINGS (Admin only)
+router.get("/recent", auth, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: "Access denied. Admin role required." });
+    }
+
+    const recentBookings = await Booking.find()
+      .populate('user', 'name email')
+      .populate({
+        path: 'car',
+        select: 'name brand year pricePerDay images provider',
+        populate: {
+          path: 'provider',
+          select: 'name email'
+        }
+      })
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+    res.json(recentBookings);
+  } catch (error) {
+    console.error("GET RECENT BOOKINGS ERROR:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 // GET SINGLE BOOKING
 router.get("/:id", auth, async (req, res) => {
   try {

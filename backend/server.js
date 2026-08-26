@@ -10,6 +10,10 @@ const upload = require("./middleware/upload");
 // Import models to ensure they're loaded
 require('./models/user');
 require('./models/car');
+
+// Import models to ensure they're loaded
+require('./models/user');
+require('./models/car');
 require('./models/booking');
 require('./models/payment');
 require('./models/wallet'); // New wallet model
@@ -23,6 +27,7 @@ const paymentRoutes = require("./routes/paymentRoutes"); // Payment routes
 const userRoutes = require("./routes/userRoutes"); // User management routes including cart
 const walletRoutes = require("./routes/walletRoutes"); // New wallet routes
 const feedbackRoutes = require("./routes/feedbackRoutes"); // New feedback routes
+const adminRoutes = require("./routes/adminRoutes"); // Admin dashboard routes
 
 const app = express();
 
@@ -82,23 +87,6 @@ app.post("/api/upload", auth, upload.single("image"), (req, res) => {
   }
   return res.json({ imageUrl: `/uploads/cars/${req.file.filename}` });
 });
-
-// -------------------------------------------
-// API Routes
-// -------------------------------------------
-app.use("/api/auth", authRoutes);
-app.use("/api/cars", carRoutes);
-app.use("/api/bookings", bookingRoutes);
-app.use("/api/payments", paymentRoutes);
-app.use("/api/users", userRoutes); // This includes cart routes
-app.use("/api/wallet", walletRoutes); // New wallet routes
-app.use("/api/feedback", feedbackRoutes); // New feedback routes
-
-// -------------------------------------------
-// MongoDB Connection
-// -------------------------------------------
-const connectDB = async () => {
-  try {
     console.log("Attempting to connect to MongoDB...");
     console.log("MONGO_URI:", process.env.MONGO_URI ? process.env.MONGO_URI.replace(/\/\/.*@/, '//***@') : "Not set"); // Hide credentials in log
     

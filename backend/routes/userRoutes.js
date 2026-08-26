@@ -1,6 +1,7 @@
 const express = require("express");
 const Cart = require("../models/cart");
 const Car = require("../models/car");
+const User = require("../models/user");
 const auth = require("../middleware/authmiddleware");
 
 const router = express.Router();
@@ -154,6 +155,34 @@ router.patch("/cart/:carId", auth, async (req, res) => {
     res.json(populatedCart);
   } catch (error) {
     console.error("UPDATE CART ITEM ERROR:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// GET ALL USERS (Admin only)
+router.get("/", auth, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: "Access denied. Admin role required." });
+    }
+    const users = await User.find().select('-password').sort({ createdAt: -1 });
+    res.json(users);
+  } catch (error) {
+    console.error("GET USERS ERROR:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// GET RECENT USERS (Admin only)
+router.get("/recent", auth, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: "Access denied. Admin role required." });
+    }
+    const users = await User.find().select('-password').sort({ createdAt: -1 }).limit(5);
+    res.json(users);
+  } catch (error) {
+    console.error("GET RECENT USERS ERROR:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
