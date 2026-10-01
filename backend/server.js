@@ -11,9 +11,6 @@ const upload = require("./middleware/upload");
 require('./models/user');
 require('./models/car');
 
-// Import models to ensure they're loaded
-require('./models/user');
-require('./models/car');
 require('./models/booking');
 require('./models/payment');
 require('./models/wallet'); // New wallet model
@@ -87,6 +84,24 @@ app.post("/api/upload", auth, upload.single("image"), (req, res) => {
   }
   return res.json({ imageUrl: `/uploads/cars/${req.file.filename}` });
 });
+
+// -------------------------------------------
+// API Routes
+// -------------------------------------------
+app.use("/api/auth", authRoutes);
+app.use("/api/cars", carRoutes);
+app.use("/api/bookings", bookingRoutes);
+app.use("/api/payments", paymentRoutes);
+app.use("/api/users", userRoutes); // This includes cart routes
+app.use("/api/wallet", walletRoutes); // New wallet routes
+app.use("/api/feedback", feedbackRoutes); // New feedback routes
+app.use("/api/admin", adminRoutes); // Admin dashboard routes
+
+// -------------------------------------------
+// MongoDB Connection
+// -------------------------------------------
+const connectDB = async () => {
+  try {
     console.log("Attempting to connect to MongoDB...");
     console.log("MONGO_URI:", process.env.MONGO_URI ? process.env.MONGO_URI.replace(/\/\/.*@/, '//***@') : "Not set"); // Hide credentials in log
     
